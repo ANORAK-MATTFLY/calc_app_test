@@ -12,7 +12,8 @@ const Values = [
   { value: "7", operation: "number" },
   { value: "8", operation: "number" },
   { value: "9", operation: "number" },
-  { value: "D", operation: "delete" },
+  { value: "Delete", operation: "delete" },
+
   { value: "4", operation: "number" },
   { value: "5", operation: "number" },
   { value: "6", operation: "number" },
@@ -25,6 +26,10 @@ const Values = [
   { value: "0", operation: "number" },
   { value: "/", operation: "operation" },
   { value: "x", operation: "operation" },
+  { value: "AC", operation: "ac" },
+
+  { value: "(", operation: "open-parenthesis" },
+  { value: ")", operation: "closing-parenthesis" },
 ]
 
 export default function Home() {
@@ -44,8 +49,8 @@ export default function Home() {
 
   })
 
-
-
+  const [currentValue, setCurrentValue] = useState(0);
+  const [showResult, setShowResult] = useState(false);
 
 
   const [result, setResult] = useState(null)
@@ -64,6 +69,7 @@ export default function Home() {
     })
 
     setResult(null)
+    setCurrentValue(0);
   }
 
   async function compute() {
@@ -72,6 +78,9 @@ export default function Home() {
         let result =
           parseFloat(calculation.num01) + parseFloat(calculation.num02)
         setResult(result)
+        setCurrentValue(result);
+
+
         setCalculation({ num01: result.toString(), num02: "", operation: "" })
         break
 
@@ -79,6 +88,9 @@ export default function Home() {
         let result02 =
           parseFloat(calculation.num01) - parseFloat(calculation.num02)
         setResult(result02)
+        setCurrentValue(result02);
+
+
         setCalculation({ num01: result02.toString(), num02: "", operation: "" })
         break
 
@@ -86,6 +98,9 @@ export default function Home() {
         let result03 =
           parseFloat(calculation.num01) / parseFloat(calculation.num02)
         setResult(result03)
+        setCurrentValue(result03);
+
+
         setCalculation({ num01: result03.toString(), num02: "", operation: "" })
         break
 
@@ -93,9 +108,12 @@ export default function Home() {
         let result04 =
           parseFloat(calculation.num01) * parseFloat(calculation.num02)
         setResult(result04)
+        setCurrentValue(result04);
+
         setCalculation({ num01: result04.toString(), num02: "", operation: "" })
         break
     }
+
   }
 
   function append(buttonContent, buttonType) {
@@ -127,6 +145,20 @@ export default function Home() {
       setCalculation((prev) => ({ ...prev, num02: prev.num02 + buttonContent }))
     }
   }
+  function deleteElement() {
+    if (currentValue.toString().length == 1) {
+      setCurrentValue(0)
+      return;
+    }
+    if (currentValue.toString().length > 1) {
+      let tempValue = currentValue.toString().split("");
+      tempValue.pop();
+
+      tempValue.join("");
+
+      setCurrentValue(tempValue.join(""))
+    }
+  }
 
   function handleClick(e) {
     const buttonType = e.target.id
@@ -134,15 +166,30 @@ export default function Home() {
 
 
     if (buttonType === "number" || buttonType === "operation") {
+      let tempValue = currentValue.toString().split();
+      if (tempValue.length == 1 && tempValue[0] == 0) {
+        tempValue.pop()
+      }
+      tempValue.push(buttonContent);
+      tempValue = tempValue.join("")
+      setCurrentValue(tempValue);
+      data = tempValue
+
       append(buttonContent, buttonType)
+
     }
     if (buttonType === "style_execute__wGRpP") {
       compute()
     }
-    if (buttonType === "AC") {
+    if (buttonType === "ac") {
       AC()
     }
+    if (buttonType === "delete") {
+      deleteElement(buttonContent, buttonType);
+    }
   }
+
+
 
   //updates current view
   useEffect(() => {
@@ -158,7 +205,7 @@ export default function Home() {
     <>
       <section>
         <div className={style.container}>
-          <div id={style.display}>{`${!result ? 0 : result}`}</div>
+          <div id={style.display}>{`${currentValue}`}</div>
           <div className={style.buttons}>
             {Values.map((item) => (
               <div key={item.value}>
